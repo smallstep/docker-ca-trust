@@ -1,0 +1,26 @@
+FROM mongo
+ARG CA_URL=https://ca.oloid.io:4443
+ARG CA_FINGERPRINT=c8de28e620ec4367f734a0c405d92d7350dbec351cec3e4f6a6d1fc9512387aa
+ENV CA_URL=${CA_URL} CA_FINGERPRINT=${CA_FINGERPRINT}
+RUN apt update; \
+    apt install -y --no-install-recommends \
+        curl \
+        jq \ 
+        openssl \
+    ; \
+    curl -ks "${CA_URL}/root/${CA_FINGERPRINT}" \
+      | jq -re ".ca" \
+	  | tee /usr/local/share/ca-certificates/root_ca.crt; \
+      fingerprint=$(openssl x509 -in /usr/local/share/ca-certificates/root_ca.crt -noout -sha256 -fingerprint \
+			| tr -d ":" \
+            | cut -d "=" -f 2 \
+            | tr "[:upper:]" "[:lower:]"); \
+      if [ $fingerprint = ${CA_FINGERPRINT} ]; then \
+		/usr/sbin/update-ca-certificates; \
+      else \
+        echo >&2; \
+		echo >&2 "error: CA certificate fingerprint $fingerprint does not match expected value ${CA_FINGERPRINT}"; \
+        echo >&2; \
+        exit 1; \
+     fi; \
+     rm -rf /var/lib/apt/lists/*
