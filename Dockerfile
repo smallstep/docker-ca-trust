@@ -16,9 +16,9 @@ RUN apt update; \
       | jq -re ".ca" \
 	  | tee /usr/local/share/ca-certificates/root_ca.crt; \
       fingerprint=$(openssl x509 -in /usr/local/share/ca-certificates/root_ca.crt -noout -sha256 -fingerprint \
-			| tr -d ":" \
-            | cut -d "=" -f 2 \
-            | tr "[:upper:]" "[:lower:]"); \
+                    | tr -d ":" \
+                    | cut -d "=" -f 2 \
+                    | tr "[:upper:]" "[:lower:]"); \
       if [ $fingerprint = ${CA_FINGERPRINT} ]; then \
 		/usr/sbin/update-ca-certificates; \
       else \
