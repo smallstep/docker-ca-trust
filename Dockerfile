@@ -14,17 +14,17 @@ RUN apt update; \
     ; \
     curl -ks "${CA_URL}/root/${CA_FINGERPRINT}" \
       | jq -re ".ca" \
-	  | tee /usr/local/share/ca-certificates/root_ca.crt; \
-      fingerprint=$(openssl x509 -in /usr/local/share/ca-certificates/root_ca.crt -noout -sha256 -fingerprint \
+      | tee /usr/local/share/ca-certificates/root_ca.crt; \
+    fingerprint=$(openssl x509 -in /usr/local/share/ca-certificates/root_ca.crt -noout -sha256 -fingerprint \
                     | tr -d ":" \
                     | cut -d "=" -f 2 \
                     | tr "[:upper:]" "[:lower:]"); \
-      if [ $fingerprint = ${CA_FINGERPRINT} ]; then \
-		/usr/sbin/update-ca-certificates; \
-      else \
-        echo >&2; \
-		echo >&2 "error: CA certificate fingerprint $fingerprint does not match expected value ${CA_FINGERPRINT}"; \
-        echo >&2; \
-        exit 1; \
-     fi; \
-     rm -rf /var/lib/apt/lists/*
+    if [ $fingerprint = ${CA_FINGERPRINT} ]; then \
+	  /usr/sbin/update-ca-certificates; \
+    else \
+      echo >&2; \
+      echo >&2 "error: CA certificate fingerprint $fingerprint does not match expected value ${CA_FINGERPRINT}"; \
+      echo >&2; \
+      exit 1; \
+    fi; \
+    rm -rf /var/lib/apt/lists/*
