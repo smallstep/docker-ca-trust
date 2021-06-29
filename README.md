@@ -1,6 +1,6 @@
 # docker-ca-trust
 
-This is an example of a Docker image that bootstraps with an internal `step-ca` server.
+This is an example of a Docker image that bootstraps with an internal [`step-ca`](https://github.com/smallstep/certificates/) server.
 It can serve as a pattern for trusting internal CAs, for any Ubuntu-based Docker image.
 The CA URL and Fingerprint can be hardcoded in the `Dockerfile` or supplied as build arguments.
 
