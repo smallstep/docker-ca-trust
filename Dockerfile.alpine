@@ -1,0 +1,29 @@
+FROM alpine
+
+# Change these, or supply them via build args:
+ARG CA_URL=https://certmgr.beta.ca.smallstep.com
+ARG CA_FINGERPRINT=5d7858904294e59aac64c41b38feb6154fb22e51d4095cde500be56c8a93cacf
+
+ENV CA_URL=${CA_URL} CA_FINGERPRINT=${CA_FINGERPRINT}
+RUN apt update; \
+    apk --no-cache add \
+        curl \
+        jq \
+        openssl \
+    ; \
+    curl -ks "${CA_URL}/root/${CA_FINGERPRINT}" \
+      | jq -re ".ca" \
+      | tee /usr/local/share/ca-certificates/root_ca.crt; \
+    fingerprint=$(openssl x509 -in /usr/local/share/ca-certificates/root_ca.crt -noout -sha256 -fingerprint \
+                    | tr -d ":" \
+                    | cut -d "=" -f 2 \
+                    | tr "[:upper:]" "[:lower:]"); \
+    if [ $fingerprint = ${CA_FINGERPRINT} ]; then \
+	  /usr/sbin/update-ca-certificates; \
+    else \
+      echo >&2; \
+      echo >&2 "error: CA cert fingerprint $fingerprint does not match expected value ${CA_FINGERPRINT}"; \
+      echo >&2; \
+      exit 1; \
+    fi; \
+

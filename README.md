@@ -1,16 +1,21 @@
 # docker-ca-trust
 
-This is an example of a Docker image that bootstraps with an internal [`step-ca`](https://github.com/smallstep/certificates/) server.
-It can serve as a pattern for trusting internal CAs, for any Ubuntu-based Docker image.
-The CA URL and Fingerprint can be hardcoded in the `Dockerfile` or supplied as build arguments.
+This is a set of Dockerfiles that can bootstrap an internal [`step-ca`](https://github.com/smallstep/certificates/) server on top of an OS image.
+It can serve as a pattern for trusting internal CAs, for any Docker image.
 
-This image can be layered on top of any Ubuntu-based server image.
-For example, change `FROM ubuntu:focal` to `FROM mongo` and you will get a MongoDB server that trusts your CA.
-The CA certificate is stored in `/usr/local/share/ca-certificates/root_ca.crt` in the container.
+Supported base images:
 
-To build it:
+* `ubuntu:focal`
+* `alpine:latest`
+
+## Example usage
+
+Say we want the `mongo` image to trust an internal CA.  `mongo` uses `ubuntu:focal`. So start with `Dockerfile.ubuntu`, and change `FROM ubuntu:focal` to `FROM mongo`. Build it and you will get a MongoDB server that trusts your CA.
+
+The CA URL and Fingerprint can be hardcoded in the `Dockerfile`, or supplied as build arguments:
 
 ```
-docker build . --build-arg CA_URL=https://ca.smallstep.com --build-arg CA_FINGERPRINT=abc123123
+docker build -f Dockerfile.ubuntu . --build-arg CA_URL=https://ca.example.com --build-arg CA_FINGERPRINT=abc123123
+docker build -f Dockerfile.alpine . --build-arg CA_URL=https://ca.example.com --build-arg CA_FINGERPRINT=abc123123
 ```
 
